@@ -1,66 +1,68 @@
-# NotebookLM Clone — RAG Application
+# 📓 NotebookLM Clone — RAG Application
 
-A full RAG pipeline application where users can upload documents and chat with them.
+> A full RAG pipeline application where users can upload documents and chat with them.
+
+🔗 **Live Demo:** [rag-notebook-lm.netlify.app](https://rag-notebook-lm.netlify.app/)
+
+---
+
+## RAG Pipeline
+
+| Step | Stage | Description |
+|------|-------|-------------|
+| 01 | **Ingestion** | User uploads a PDF or `.txt` file. Text is extracted using `pdf-parse` (PDF) or read directly (txt). |
+| 02 | **Chunking** | Recursive Character Text Splitter — 800-token chunks with 150-token overlap. Splits on paragraph → sentence → word boundaries to preserve semantic coherence. Each chunk gets metadata: `{ source, page, chunkIndex, totalChunks }`. |
+| 03 | **Embedding** | `HuggingFaceInferenceEmbeddings` via `@langchain/community` — handles the correct API endpoint, cold-start waiting, and response parsing internally. |
+| 04 | **Storage** | Pinecone serverless index (free tier supports up to 1M vectors). Each vector stored with full chunk text + metadata for retrieval. |
+| 05 | **Retrieval** | Top-K=5 similarity search using cosine similarity. Query is embedded with the same model as the documents. |
+| 06 | **Generation** | Retrieved chunks assembled into a grounded context prompt. OpenRouter models answer **only** from retrieved context via a strict system prompt. |
+
+---
 
 ## Tech Stack
 
 ### Backend
-- **Node.js + Express** — REST API server
-- **pdf-parse** — PDF text extraction
-- **@langchain/openai** — OpenAI embeddings (`text-embedding-3-small`)
-- **@pinecone-database/pinecone** — Vector database (free tier)
-- **openai** — GPT-4.1-mini for answer generation
-- **multer** — File upload handling
+
+| Package | Role |
+|---------|------|
+| `express` | REST API server |
+| `multer` | File upload handling |
+| `pdfjs-dist` | PDF text extraction |
+| `@langchain/openai` | OpenAI embeddings (`text-embedding-3-small`) |
+| `@pinecone-database/pinecone` | Vector database (free tier) |
+| `openai` | GPT-4.1-mini for answer generation |
 
 ### Frontend
-- **Vite + React** — Fast dev build
-- **Tailwind CSS** — Utility-first styling
 
-## RAG Pipeline
+| Package | Role |
+|---------|------|
+| `vite + react` | Fast dev build |
+| `tailwindcss` | Utility-first styling |
+| `UploadZone` | Drag & drop file upload UI |
+| `ChatWindow` | Conversation display |
+| `MessageBubble` | Message rendering |
+| `SourceChips` | Citation/source display |
 
-### 1. Ingestion
-- User uploads a PDF or `.txt` file
-- Text is extracted using `pdf-parse` (PDF) or read directly (txt)
-
-### 2. Chunking Strategy
-- **Recursive Character Text Splitter** (implemented from scratch)
-- Chunk size: **800 tokens** with **150 token overlap**
-- Splits on paragraph → sentence → word boundaries to preserve semantic coherence
-- Each chunk gets metadata: `{ source, page, chunkIndex, totalChunks }`
-
-### 3. Embedding
-- Model: `text-embedding-3-small` (1536 dimensions, cost-efficient, high quality)
-- Batched in groups of 100 to respect API limits
-
-### 4. Storage
-- **Pinecone** serverless index (free tier supports up to 1M vectors)
-- Each vector stored with full chunk text + metadata for retrieval
-
-### 5. Retrieval
-- Top-K=5 similarity search using cosine similarity
-- Query is embedded with the same model
-
-### 6. Generation
-- Retrieved chunks assembled into a grounded context prompt
-- GPT-4.1-mini answers ONLY from retrieved context (strict system prompt)
+---
 
 ## Setup
 
 ### Environment Variables
 
-**Backend** (`backend/.env`):
-```
-OPENAI_API_KEY=your_openai_key
+**`backend/.env`**
+```env
 PINECONE_API_KEY=your_pinecone_key
 PINECONE_INDEX_NAME=notebooklm
+OPENROUTER_API_KEY=your_openrouter_api_key
+HUGGINGFACEHUB_API_KEY=your_hf_access_token
 ```
 
-**Frontend** (`frontend/.env`):
-```
-VITE_API_URL=http://localhost:3001
+**`frontend/.env`**
+```env
+VITE_API_URL=backend_deployed_url
 ```
 
-### Run
+### Run Locally
 
 ```bash
 # Backend
@@ -74,6 +76,8 @@ npm install
 npm run dev
 ```
 
+---
+
 ## File Structure
 
 ```
@@ -82,7 +86,7 @@ notebooklm/
 │   ├── src/
 │   │   ├── index.js          # Express server
 │   │   ├── chunker.js        # Recursive text splitter
-│   │   ├── embedder.js       # OpenAI embedding logic
+│   │   ├── embedder.js       # Embedding logic
 │   │   ├── vectorStore.js    # Pinecone integration
 │   │   └── rag.js            # Full RAG pipeline orchestrator
 │   ├── uploads/              # Temp file storage
