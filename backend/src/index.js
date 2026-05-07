@@ -128,3 +128,14 @@ app.listen(PORT, () => {
     `   Pinecone index: ${process.env.PINECONE_INDEX_NAME || "notebooklm"}`,
   );
 });
+
+// Keep-alive ping for Render free tier
+const BACKEND_URL = process.env.RENDER_EXTERNAL_URL;
+if (BACKEND_URL) {
+  setInterval(async () => {
+    try {
+      await fetch(`${BACKEND_URL}/api/health`);
+      console.log("[Keep-alive] pinged");
+    } catch (e) {}
+  }, 10 * 60 * 1000); // every 10 minutes
+}
