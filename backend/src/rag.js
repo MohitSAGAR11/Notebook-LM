@@ -30,10 +30,10 @@ const READ_STREAM_CHUNK = 64 * 1024; // 64KB
  * Generate N alternative rephrasings of the user's question.
  * More diverse queries → wider recall from the vector store.
  * @param {string} question - original user question
- * @param {number} n - number of alternatives to generate (default 3)
+ * @param {number} n - number of alternatives to generate (default 2)
  * @returns {Promise<string[]>} - [original, alt1, alt2, ...]
  */
-async function expandQuery(question, n = 3) {
+async function expandQuery(question, n = 2) {
   try {
     const response = await openai.chat.completions.create({
       model: "openai/gpt-oss-120b:free",
@@ -207,7 +207,7 @@ export async function answerQuestion({ docId, question, history = [] }) {
   console.log(`[RAG] Using ${queries.length} query variants`);
 
   // 2. Embed all query variants and retrieve candidates for each
-  const CANDIDATES_PER_QUERY = 8;
+  const CANDIDATES_PER_QUERY = 5;
   const seenIds = new Set();
   const allCandidates = [];
 
