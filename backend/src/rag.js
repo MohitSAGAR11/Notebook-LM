@@ -14,6 +14,7 @@ import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { chunkDocument } from "./chunker.js";
 import { embedChunks, embedQuery } from "./embedder.js";
 import { upsertVectors, queryVectors } from "./vectorStore.js";
+import { rerank } from "./reranker.js";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -22,6 +23,42 @@ const openai = new OpenAI({
 
 const EMBED_BATCH_SIZE = 50;
 const READ_STREAM_CHUNK = 64 * 1024; // 64KB
+
+// ─── QUERY EXPANSION ──────────────────────────────────────────────────────────
+
+/**
+ * Generate N alternative rephrasings of the user's question.
+ * More diverse queries → wider recall from the vector store.
+ * @param {string} question - original user question
+ * @param {number} n - number of alternatives to generate (default 3)
+ * @returns {Promise<string[]>} - [original, alt1, alt2, ...]
+ */
+async function expandQuery(question, n = 3) {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "openai/gpt-oss-120b:free",
+      messages: [
+        {
+          role: "system",
+          content: `You generate alternative rephrasings of a question. Output ONLY a JSON array of ${n} strings. No explanation, no markdown, just the raw JSON array.`,
+        },
+        {
+          role: "user",
+          content: `Generate ${n} different rephrasings of this question that preserve the same meaning:\n\n"${question}"`,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 256,
+    });
+
+    const raw = response.choices[0].message.content.trim();
+    const alternatives = JSON.parse(raw);
+    return [question, ...alternatives.slice(0, n)];
+  } catch {
+    // On any failure, fall back gracefully to just the original question
+    return [question];
+  }
+}
 
 // ─── INGESTION ────────────────────────────────────────────────────────────────
 
@@ -164,11 +201,39 @@ export async function ingestDocument({ filePath, mimeType, docId, fileName }) {
 export async function answerQuestion({ docId, question, history = [] }) {
   console.log(`[RAG] Answering: "${question}"`);
 
-  // 1. Embed the query
-  const queryEmbedding = await embedQuery(question);
+  // 1. Expand query into multiple rephrasings for wider recall
+  console.log(`[RAG] Expanding query...`);
+  const queries = await expandQuery(question);
+  console.log(`[RAG] Using ${queries.length} query variants`);
 
-  // 2. Retrieve top-K relevant chunks
-  const retrieved = await queryVectors(docId, queryEmbedding, 5);
+  // 2. Embed all query variants and retrieve candidates for each
+  const CANDIDATES_PER_QUERY = 8;
+  const seenIds = new Set();
+  const allCandidates = [];
+
+  for (const q of queries) {
+    const qEmbedding = await embedQuery(q);
+    const results = await queryVectors(docId, qEmbedding, CANDIDATES_PER_QUERY);
+    for (const r of results) {
+      // Deduplicate by chunk index to avoid feeding the same chunk multiple times
+      const uid = `${r.metadata.chunkIndex}`;
+      if (!seenIds.has(uid)) {
+        seenIds.add(uid);
+        allCandidates.push(r);
+      }
+    }
+  }
+
+  if (allCandidates.length === 0) {
+    return {
+      answer:
+        "I couldn't find any relevant information in the document to answer your question.",
+      sources: [],
+    };
+  }
+
+  // 3. Rerank: score all candidates and keep only the best 5
+  const retrieved = await rerank(question, allCandidates, 5);
 
   if (retrieved.length === 0) {
     return {
@@ -178,7 +243,7 @@ export async function answerQuestion({ docId, question, history = [] }) {
     };
   }
 
-  // 3. Build context string
+  // 4. Build context string
   const context = retrieved
     .map(
       (r, i) =>
@@ -186,13 +251,13 @@ export async function answerQuestion({ docId, question, history = [] }) {
     )
     .join("\n\n---\n\n");
 
-  // 4. Build conversation history for multi-turn
+  // 5. Build conversation history for multi-turn
   const conversationHistory = history.slice(-6).map((msg) => ({
     role: msg.role,
     content: msg.content,
   }));
 
-  // 5. Generate grounded answer
+  // 6. Generate grounded answer
   const systemPrompt = `You are a precise document analysis assistant. Your ONLY job is to answer questions based on the document excerpts provided in the context below.
 
 STRICT RULES:
@@ -203,8 +268,9 @@ STRICT RULES:
 - Do NOT reference chunks, sources, or internal metadata in your answer. Just answer naturally.
 - Be concise but complete. Use bullet points for lists.
 - If asked for code, examples, or steps — reproduce them exactly as they appear in the document.
+- Before answering, mentally filter each chunk: only use sentences from a chunk that are directly relevant to the question. Ignore irrelevant sentences within a chunk.
 
-CONTEXT FROM DOCUMENT:
+RETRIEVED CONTEXT (ranked by relevance, most relevant first):
 ${context}`;
 
   const response = await openai.chat.completions.create({

@@ -55,7 +55,6 @@ async function getIndex() {
  * @param {Array<{ text: string, metadata: object }>} chunks
  * @param {number[][]} embeddings - parallel array of vectors
  */
-// Change the signature:
 export async function upsertVectors(
   namespace,
   chunks,
