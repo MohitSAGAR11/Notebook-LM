@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import UploadZone from "./components/UploadZone";
 import MessageBubble from "./components/MessageBubble";
+import LandingPage from "./components/LandingPage";
 
 const API = import.meta.env.VITE_API_URL || "";
 
 export default function App() {
-  const [docData, setDocData] = useState(null); // { docId, fileName, chunkCount }
+  const [view, setView] = useState("landing");
+  const [docData, setDocData] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
 
-  // Auto-scroll to bottom of chat
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
@@ -55,7 +56,10 @@ export default function App() {
     }
   };
 
-  // ─── Upload View ─────────────────────────────────────────────────────────
+  if (view === "landing") {
+    return <LandingPage onLaunch={() => setView("app")} />;
+  }
+
   if (!docData) {
     return (
       <div style={styles.container}>
@@ -64,32 +68,28 @@ export default function App() {
     );
   }
 
-  // ─── Chat View ────────────────────────────────────────────────────────────
   return (
     <div style={styles.chatContainer} className="fade-in">
-      {/* Sidebar */}
       <aside style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
           <div style={styles.docIcon}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M3 1h7l4 4v10H3V1z" stroke="var(--accent)" strokeWidth="1.2" strokeLinejoin="round"/>
-              <path d="M10 1v4h4" stroke="var(--accent)" strokeWidth="1.2" strokeLinejoin="round"/>
-              <path d="M5 7h6M5 9.5h6M5 12h3" stroke="var(--accent)" strokeWidth="1" strokeLinecap="round" opacity="0.6"/>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-plum-voltage)" strokeWidth="1.5">
+              <path d="M12 2L2 12l10 10 10-10L12 2z" />
             </svg>
           </div>
           <div style={{ overflow: "hidden", flex: 1 }}>
             <p style={styles.docName}>{docData.fileName}</p>
-            <p style={styles.docMeta}>{docData.chunkCount} chunks indexed</p>
+            <p style={styles.docMeta}>{docData.chunkCount} segments</p>
           </div>
         </div>
 
         <div style={styles.pipelineInfo}>
-          <p style={styles.pipelineTitle}>RAG Pipeline</p>
+          <p style={styles.pipelineTitle}>RAG Architecture</p>
           {[
-            { label: "Chunker", value: "Recursive · 800ch" },
+            { label: "Splitter", value: "Recursive Chunker" },
             { label: "Embedder", value: "MiniLM-L6-v2" },
-            { label: "Vector DB", value: "Pinecone" },
-            { label: "Generator", value: "GPT-4.1-mini" },
+            { label: "Vector DB", value: "Pinecone Serverless" },
+            { label: "Generator", value: "GPT-OSS-120B" },
           ].map((item) => (
             <div key={item.label} style={styles.pipelineRow}>
               <span style={styles.pipelineLabel}>{item.label}</span>
@@ -98,12 +98,11 @@ export default function App() {
           ))}
         </div>
 
-        <button style={styles.resetBtn} onClick={() => window.location.reload()}>
-          Upload New Document
+        <button style={styles.resetBtn} onClick={() => { setDocData(null); setMessages([]); }}>
+          New Document
         </button>
       </aside>
 
-      {/* Main Chat */}
       <main style={styles.main}>
         <div style={styles.messagesList}>
           {messages.length === 0 && (
@@ -120,7 +119,6 @@ export default function App() {
             </div>
           )}
 
-          {/* MessageBubble handles markdown + SourceChips internally */}
           {messages.map((msg, i) => (
             <MessageBubble key={i} message={msg} />
           ))}
@@ -129,7 +127,7 @@ export default function App() {
             <div style={styles.botMsgRow}>
               <div style={styles.botBubble}>
                 <div style={styles.typingDots}>
-                  {[0,1,2].map((i) => (
+                  {[0, 1, 2].map((i) => (
                     <span key={i} style={{ ...styles.dot, animationDelay: `${i * 0.18}s` }} />
                   ))}
                 </div>
@@ -139,7 +137,6 @@ export default function App() {
           <div ref={scrollRef} />
         </div>
 
-        {/* Input Bar */}
         <form style={styles.inputArea} onSubmit={handleSendMessage}>
           <input
             style={styles.input}
@@ -152,7 +149,7 @@ export default function App() {
             ...styles.sendBtn,
             ...(!input.trim() || isTyping ? styles.sendBtnDisabled : {})
           }} disabled={!input.trim() || isTyping}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
             </svg>
           </button>
@@ -175,47 +172,47 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    background: "var(--color-void)",
   },
   chatContainer: {
     display: "flex",
     height: "100%",
-    background: "var(--bg)",
+    background: "var(--color-void)",
   },
-  // ── Sidebar ──
   sidebar: {
-    width: "260px",
-    borderRight: "1px solid var(--border)",
-    padding: "20px",
+    width: "280px",
+    borderRight: "1px solid rgba(255, 255, 255, 0.08)",
+    padding: "24px",
     display: "flex",
     flexDirection: "column",
-    gap: "16px",
-    background: "var(--bg-2)",
+    gap: "18px",
+    background: "var(--color-void)",
     flexShrink: 0,
   },
   sidebarHeader: {
     display: "flex",
     alignItems: "center",
-    gap: "10px",
-    padding: "12px",
-    background: "var(--bg-3)",
-    borderRadius: "10px",
-    border: "1px solid var(--border)",
+    gap: "12px",
+    padding: "16px",
+    background: "transparent",
+    borderRadius: "var(--radius-cards)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
   },
   docIcon: {
-    width: "32px",
-    height: "32px",
-    borderRadius: "8px",
-    background: "var(--accent-dim)",
-    border: "1px solid rgba(200,180,250,0.2)",
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    border: "1px solid rgba(255, 255, 255, 0.15)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
   docName: {
-    fontSize: "12px",
-    fontWeight: "600",
-    color: "var(--text-primary)",
+    fontFamily: "var(--font-acronym)",
+    fontSize: "13px",
+    fontWeight: "var(--font-weight-semibold)",
+    color: "var(--color-bone)",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -223,27 +220,28 @@ const styles = {
   },
   docMeta: {
     fontSize: "11px",
-    color: "var(--text-muted)",
+    color: "var(--color-smoke)",
     marginTop: "2px",
     fontFamily: "var(--font-mono)",
     margin: 0,
   },
   pipelineInfo: {
-    padding: "12px",
-    background: "var(--bg-3)",
-    borderRadius: "10px",
-    border: "1px solid var(--border)",
+    padding: "16px",
+    background: "transparent",
+    borderRadius: "var(--radius-cards)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "10px",
   },
   pipelineTitle: {
-    fontSize: "10px",
-    fontFamily: "var(--font-mono)",
-    color: "var(--text-muted)",
+    fontFamily: "var(--font-acronym)",
+    fontSize: "11px",
+    fontWeight: "var(--font-weight-semibold)",
+    color: "var(--color-bone)",
     textTransform: "uppercase",
-    letterSpacing: "0.08em",
-    marginBottom: "2px",
+    letterSpacing: "0.05em",
+    marginBottom: "4px",
   },
   pipelineRow: {
     display: "flex",
@@ -251,31 +249,35 @@ const styles = {
     alignItems: "center",
   },
   pipelineLabel: {
-    fontSize: "11px",
-    color: "var(--text-secondary)",
+    fontSize: "12px",
+    color: "var(--color-smoke)",
   },
   pipelineValue: {
-    fontSize: "11px",
-    color: "var(--accent)",
-    fontFamily: "var(--font-mono)",
+    fontSize: "12px",
+    color: "var(--color-plum-voltage)",
+    fontWeight: "var(--font-weight-semibold)",
   },
   resetBtn: {
+    fontFamily: "var(--font-acronym)",
     marginTop: "auto",
-    padding: "10px",
+    padding: "12px",
     background: "transparent",
-    border: "1px solid var(--border)",
-    color: "var(--text-secondary)",
-    borderRadius: "8px",
+    border: "1.5px solid var(--color-plum-voltage)",
+    color: "var(--color-bone)",
+    borderRadius: "var(--radius-buttons)",
     fontSize: "12px",
+    fontWeight: "var(--font-weight-semibold)",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
     cursor: "pointer",
-    fontFamily: "var(--font-body)",
+    transition: "background 0.2s ease",
   },
-  // ── Chat ──
   main: {
     flex: 1,
     display: "flex",
     flexDirection: "column",
     minWidth: 0,
+    background: "var(--color-void)",
   },
   messagesList: {
     flex: 1,
@@ -287,88 +289,103 @@ const styles = {
   emptyState: {
     margin: "auto",
     textAlign: "center",
+    maxWidth: "480px",
   },
   emptyTitle: {
-    fontFamily: "var(--font-display)",
-    fontStyle: "italic",
-    fontSize: "26px",
-    color: "var(--text-primary)",
-    marginBottom: "8px",
+    fontFamily: "var(--font-acronym)",
+    fontWeight: "var(--font-weight-extralight)",
+    fontSize: "36px",
+    color: "var(--color-bone)",
+    marginBottom: "12px",
+    letterSpacing: "-0.01em",
   },
   emptySub: {
-    fontSize: "14px",
-    color: "var(--text-secondary)",
-    marginBottom: "20px",
+    fontSize: "15px",
+    color: "var(--color-smoke)",
+    marginBottom: "24px",
+    lineHeight: "1.5",
   },
   suggestions: {
     display: "flex",
-    flexWrap: "wrap",
-    gap: "8px",
-    justifyContent: "center",
+    flexDirection: "column",
+    gap: "10px",
+    alignItems: "center",
   },
   suggestion: {
-    padding: "7px 14px",
-    background: "var(--bg-3)",
-    border: "1px solid var(--border)",
-    borderRadius: "20px",
-    color: "var(--text-secondary)",
-    fontSize: "12px",
+    padding: "10px 20px",
+    background: "transparent",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: "var(--radius-buttons)",
+    color: "var(--color-ash)",
+    fontSize: "13px",
     cursor: "pointer",
-    fontFamily: "var(--font-body)",
+    width: "100%",
+    maxWidth: "320px",
+    textAlign: "center",
+    transition: "border-color 0.2s ease, color 0.2s ease",
   },
-  botMsgRow: { display: "flex", justifyContent: "flex-start", marginBottom: "20px" },
+  botMsgRow: {
+    display: "flex",
+    justifyContent: "flex-start",
+    marginBottom: "18px",
+  },
   botBubble: {
     padding: "12px 16px",
-    background: "var(--bg-2)",
-    border: "1px solid var(--border)",
-    borderRadius: "14px",
-    borderTopLeftRadius: "4px",
+    background: "transparent",
+    border: "1px solid var(--color-plum-voltage)",
+    borderRadius: "var(--radius-cards)",
   },
-  typingDots: { display: "flex", gap: "5px", alignItems: "center", height: "18px" },
+  typingDots: {
+    display: "flex",
+    gap: "6px",
+    alignItems: "center",
+    height: "18px",
+  },
   dot: {
     width: "6px",
     height: "6px",
     borderRadius: "50%",
-    background: "var(--accent)",
+    background: "var(--color-plum-voltage)",
     display: "inline-block",
     animation: "dotBounce 1.2s ease-in-out infinite",
   },
-  // ── Input ──
   inputArea: {
-    padding: "16px 24px",
-    borderTop: "1px solid var(--border)",
+    padding: "20px 24px",
+    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
     display: "flex",
-    gap: "10px",
-    background: "var(--bg)",
+    gap: "12px",
+    background: "var(--color-void)",
     flexShrink: 0,
   },
   input: {
     flex: 1,
-    background: "var(--bg-2)",
-    border: "1px solid var(--border)",
-    borderRadius: "10px",
-    padding: "11px 16px",
-    color: "var(--text-primary)",
+    background: "transparent",
+    border: "1px solid rgba(255, 255, 255, 0.15)",
+    borderRadius: "var(--radius-buttons)",
+    padding: "12px 20px",
+    color: "var(--color-bone)",
     fontSize: "14px",
     outline: "none",
-    fontFamily: "var(--font-body)",
+    fontFamily: "var(--font-acronym)",
+    transition: "border-color 0.2s ease",
   },
   sendBtn: {
     width: "44px",
     height: "44px",
-    borderRadius: "10px",
-    background: "var(--accent)",
+    borderRadius: "50%",
+    background: "var(--color-plum-voltage)",
     border: "none",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
-    color: "#0c0c0e",
+    color: "var(--color-bone)",
     flexShrink: 0,
+    transition: "opacity 0.2s ease",
   },
   sendBtnDisabled: {
-    background: "var(--bg-4)",
-    color: "var(--text-muted)",
+    background: "rgba(255, 255, 255, 0.05)",
+    color: "var(--color-smoke)",
     cursor: "not-allowed",
   },
 };

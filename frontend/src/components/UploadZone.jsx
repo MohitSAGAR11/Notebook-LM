@@ -4,7 +4,7 @@ const API = import.meta.env.VITE_API_URL || "";
 
 export default function UploadZone({ onDocumentReady }) {
   const [dragging, setDragging] = useState(false);
-  const [status, setStatus] = useState("idle"); // idle | uploading | done | error
+  const [status, setStatus] = useState("idle");
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
   const fileRef = useRef();
@@ -57,23 +57,18 @@ export default function UploadZone({ onDocumentReady }) {
 
   return (
     <div style={styles.wrapper} className="fade-up">
-      {/* Header */}
       <div style={styles.header}>
         <div style={styles.logo}>
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <rect width="28" height="28" rx="8" fill="rgba(200,180,250,0.12)" />
-            <path d="M7 8h14M7 13h10M7 18h12" stroke="#c8b4fa" strokeWidth="1.8" strokeLinecap="round" />
-            <circle cx="21" cy="18" r="4" fill="#c8b4fa" opacity="0.9" />
-            <path d="M21 16.5v3M19.5 18h3" stroke="#0c0c0e" strokeWidth="1.4" strokeLinecap="round" />
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-plum-voltage)" strokeWidth="1.5">
+            <path d="M12 2L2 12l10 10 10-10L12 2zM12 2v20M2 12h20" />
           </svg>
         </div>
         <div>
-          <h1 style={styles.title}>NotebookLM</h1>
-          <p style={styles.subtitle}>Upload a document. Ask anything.</p>
+          <h1 style={styles.title}>Dala Workspace</h1>
+          <p style={styles.subtitle}>Upload your source document to start workspace indexing.</p>
         </div>
       </div>
 
-      {/* Drop zone */}
       {status !== "done" && (
         <div
           style={{
@@ -97,13 +92,12 @@ export default function UploadZone({ onDocumentReady }) {
           {status === "idle" && (
             <div style={styles.dropContent}>
               <div style={styles.uploadIcon}>
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                  <path d="M16 4L16 22M8 12L16 4L24 12" stroke="#c8b4fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M6 26h20" stroke="#c8b4fa" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-plum-voltage)" strokeWidth="1.5">
+                  <path d="M12 5v14M5 12h14" />
                 </svg>
               </div>
-              <p style={styles.dropTitle}>Drop your document here</p>
-              <p style={styles.dropSub}>PDF or TXT · up to 20 MB · <span style={{ color: "var(--accent)" }}>browse files</span></p>
+              <p style={styles.dropTitle}>Select or drop file</p>
+              <p style={styles.dropSub}>PDF or TXT · up to 20 MB · <span style={{ color: "var(--color-plum-voltage)" }}>browse</span></p>
             </div>
           )}
 
@@ -111,14 +105,19 @@ export default function UploadZone({ onDocumentReady }) {
             <div style={styles.dropContent}>
               <div style={styles.spinner} />
               <p style={styles.dropTitle}>{progress}</p>
-              <p style={styles.dropSub}>Indexing into vector database...</p>
+              <p style={styles.dropSub}>Processing document elements into vector store...</p>
             </div>
           )}
 
           {status === "error" && (
             <div style={styles.dropContent}>
-              <div style={{ fontSize: 32 }}>⚠️</div>
-              <p style={{ ...styles.dropTitle, color: "var(--red)" }}>Upload failed</p>
+              <div style={styles.errorIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff4a4a" strokeWidth="1.5">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 8v4M12 16h.01" />
+                </svg>
+              </div>
+              <p style={{ ...styles.dropTitle, color: "#ff4a4a" }}>Upload failed</p>
               <p style={styles.dropSub}>{error}</p>
               <button style={styles.retryBtn} onClick={(e) => { e.stopPropagation(); setStatus("idle"); setError(""); }}>
                 Try again
@@ -128,17 +127,15 @@ export default function UploadZone({ onDocumentReady }) {
         </div>
       )}
 
-      {/* Features */}
       {status === "idle" && (
         <div style={styles.features} className="fade-in">
           {[
-            { icon: "⚡", label: "Recursive chunking", desc: "Semantically coherent splits" },
-            { icon: "🔮", label: "text-embedding-3-small", desc: "1536-dim OpenAI embeddings" },
-            { icon: "📦", label: "Pinecone vector DB", desc: "Cosine similarity search" },
-            { icon: "🧠", label: "GPT-4.1-mini", desc: "Grounded answers only" },
+            { label: "Recursive character chunker", desc: "800-character segments with 150-character overlaps preserving syntactic coherence." },
+            { label: "Vector representation", desc: "Hugging Face MiniLM embeddings mapped to 384 dimensional space." },
+            { label: "Isolated namespaces", desc: "Encapsulated query segments stored securely in Pinecone serverless namespaces." },
+            { label: "Grounded LLM output", desc: "Response synthesis using strict GPT-OSS-120B prompts focused purely on sources." },
           ].map((f) => (
             <div key={f.label} style={styles.feature}>
-              <span style={styles.featureIcon}>{f.icon}</span>
               <div>
                 <p style={styles.featureLabel}>{f.label}</p>
                 <p style={styles.featureDesc}>{f.desc}</p>
@@ -156,7 +153,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "32px",
+    gap: "30px",
     padding: "60px 24px",
     maxWidth: "600px",
     margin: "0 auto",
@@ -165,38 +162,42 @@ const styles = {
   header: {
     display: "flex",
     alignItems: "center",
-    gap: "14px",
+    gap: "18px",
+    width: "100%",
   },
   logo: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
   title: {
-    fontFamily: "var(--font-display)",
-    fontSize: "28px",
-    fontStyle: "italic",
-    color: "var(--text-primary)",
-    letterSpacing: "-0.02em",
+    fontFamily: "var(--font-acronym)",
+    fontSize: "var(--text-heading-sm)",
+    fontWeight: "var(--font-weight-semibold)",
+    color: "var(--color-bone)",
+    letterSpacing: "-0.01em",
   },
   subtitle: {
-    color: "var(--text-secondary)",
-    fontSize: "14px",
+    color: "var(--color-smoke)",
+    fontSize: "var(--text-body-sm)",
+    marginTop: "2px",
   },
   dropzone: {
     width: "100%",
-    border: "1.5px dashed var(--border)",
-    borderRadius: "16px",
-    padding: "52px 32px",
+    border: "1px dashed rgba(255, 255, 255, 0.15)",
+    borderRadius: "var(--radius-cards)",
+    padding: "60px 24px",
     cursor: "pointer",
-    transition: "all 0.2s ease",
-    background: "var(--bg-2)",
+    transition: "border-color 0.2s ease, background 0.2s ease",
+    background: "transparent",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
   dropzoneActive: {
-    borderColor: "var(--accent)",
-    background: "var(--accent-dim)",
-    boxShadow: "0 0 0 4px var(--accent-glow)",
+    borderColor: "var(--color-plum-voltage)",
+    background: "rgba(128, 82, 255, 0.05)",
   },
   dropzoneProcessing: {
     cursor: "not-allowed",
@@ -210,71 +211,78 @@ const styles = {
     textAlign: "center",
   },
   uploadIcon: {
-    width: "64px",
-    height: "64px",
-    borderRadius: "16px",
-    background: "var(--accent-dim)",
+    width: "48px",
+    height: "48px",
+    borderRadius: "var(--radius-buttons)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorIcon: {
+    width: "48px",
+    height: "48px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
   dropTitle: {
-    fontSize: "17px",
-    fontWeight: "500",
-    color: "var(--text-primary)",
+    fontFamily: "var(--font-acronym)",
+    fontSize: "15px",
+    fontWeight: "var(--font-weight-semibold)",
+    color: "var(--color-bone)",
   },
   dropSub: {
-    fontSize: "13px",
-    color: "var(--text-secondary)",
+    fontSize: "var(--text-caption)",
+    color: "var(--color-smoke)",
   },
   spinner: {
-    width: "36px",
-    height: "36px",
-    border: "2.5px solid var(--bg-4)",
-    borderTopColor: "var(--accent)",
+    width: "30px",
+    height: "30px",
+    border: "1.5px solid rgba(255, 255, 255, 0.1)",
+    borderTopColor: "var(--color-plum-voltage)",
     borderRadius: "50%",
     animation: "spin 0.8s linear infinite",
   },
   retryBtn: {
+    fontFamily: "var(--font-acronym)",
     marginTop: "8px",
     padding: "8px 20px",
-    background: "var(--accent-dim)",
-    border: "1px solid var(--accent)",
-    borderRadius: "8px",
-    color: "var(--accent)",
-    fontSize: "13px",
-    fontFamily: "var(--font-body)",
+    background: "transparent",
+    border: "1.5px solid #ff4a4a",
+    borderRadius: "var(--radius-buttons)",
+    color: "#ff4a4a",
+    fontSize: "12px",
     cursor: "pointer",
   },
   features: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
-    gap: "12px",
+    gap: "18px",
     width: "100%",
+    "@media (max-width: 600px)": {
+      gridTemplateColumns: "1fr",
+    },
   },
   feature: {
     display: "flex",
     alignItems: "flex-start",
     gap: "12px",
-    padding: "16px",
-    background: "var(--bg-2)",
-    borderRadius: "var(--radius-sm)",
-    border: "1px solid var(--border)",
-  },
-  featureIcon: {
-    fontSize: "20px",
-    flexShrink: 0,
-    marginTop: "1px",
+    padding: "var(--card-padding)",
+    background: "transparent",
+    borderRadius: "var(--radius-cards)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
   },
   featureLabel: {
+    fontFamily: "var(--font-acronym)",
     fontSize: "13px",
-    fontWeight: "500",
-    color: "var(--text-primary)",
-    fontFamily: "var(--font-mono)",
+    fontWeight: "var(--font-weight-semibold)",
+    color: "var(--color-bone)",
+    marginBottom: "4px",
   },
   featureDesc: {
     fontSize: "12px",
-    color: "var(--text-secondary)",
-    marginTop: "2px",
+    lineHeight: "1.4",
+    color: "var(--color-smoke)",
   },
 };

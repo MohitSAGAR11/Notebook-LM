@@ -1,28 +1,19 @@
-import React, { useState } from "react";
-import SourceChips from "./SourceChips.jsx";
+import React from "react";
 
-/**
- * Renders a single chat message — user or assistant.
- * Assistant messages support basic markdown:
- *   **bold**, `code`, ```code blocks```, bullet points, numbered lists.
- */
 export default function MessageBubble({ message }) {
   const isUser = message.role === "user";
   const isError = message.isError;
 
   return (
     <div style={{ ...styles.wrapper, ...(isUser ? styles.wrapperUser : styles.wrapperAssistant) }}>
-      {/* Avatar */}
       <div style={{ ...styles.avatar, ...(isUser ? styles.avatarUser : styles.avatarAssistant) }}>
         {isUser ? "U" : (
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <rect width="14" height="14" rx="4" fill="rgba(200,180,250,0.2)" />
-            <path d="M3 4h8M3 7h6M3 10h7" stroke="#c8b4fa" strokeWidth="1.3" strokeLinecap="round" />
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-bone)" strokeWidth="2">
+            <path d="M12 2L2 12l10 10 10-10L12 2z" />
           </svg>
         )}
       </div>
 
-      {/* Bubble */}
       <div style={{
         ...styles.bubble,
         ...(isUser ? styles.bubbleUser : styles.bubbleAssistant),
@@ -33,13 +24,9 @@ export default function MessageBubble({ message }) {
         ) : (
           <div style={styles.assistantContent}>
             <MarkdownRenderer text={message.content} />
-            {message.sources && message.sources.length > 0 && (
-              <SourceChips sources={message.sources} />
-            )}
           </div>
         )}
 
-        {/* Timestamp */}
         {message.timestamp && (
           <p style={styles.timestamp}>
             {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -50,10 +37,6 @@ export default function MessageBubble({ message }) {
   );
 }
 
-/**
- * Simple markdown renderer — handles the most common patterns
- * without needing an external library.
- */
 function MarkdownRenderer({ text }) {
   if (!text) return null;
 
@@ -65,7 +48,6 @@ function MarkdownRenderer({ text }) {
   while (i < lines.length) {
     const line = lines[i];
 
-    // Code block (```)
     if (line.trimStart().startsWith("```")) {
       const lang = line.replace(/```/, "").trim();
       const codeLines = [];
@@ -84,7 +66,6 @@ function MarkdownRenderer({ text }) {
       continue;
     }
 
-    // Heading (### or ##)
     if (line.startsWith("### ")) {
       elements.push(<h3 key={key++} style={styles.h3}>{inlineFormat(line.slice(4))}</h3>);
       i++; continue;
@@ -94,7 +75,6 @@ function MarkdownRenderer({ text }) {
       i++; continue;
     }
 
-    // Bullet list (- or *)
     if (/^(\s*[-*])\s/.test(line)) {
       const items = [];
       while (i < lines.length && /^(\s*[-*])\s/.test(lines[i])) {
@@ -111,7 +91,6 @@ function MarkdownRenderer({ text }) {
       continue;
     }
 
-    // Numbered list
     if (/^\d+\.\s/.test(line)) {
       const items = [];
       while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
@@ -128,19 +107,16 @@ function MarkdownRenderer({ text }) {
       continue;
     }
 
-    // Horizontal rule
     if (/^---+$/.test(line.trim())) {
       elements.push(<hr key={key++} style={styles.hr} />);
       i++; continue;
     }
 
-    // Empty line → spacing
     if (line.trim() === "") {
-      elements.push(<div key={key++} style={{ height: "8px" }} />);
+      elements.push(<div key={key++} style={{ height: "6px" }} />);
       i++; continue;
     }
 
-    // Regular paragraph
     elements.push(<p key={key++} style={styles.p}>{inlineFormat(line)}</p>);
     i++;
   }
@@ -148,11 +124,7 @@ function MarkdownRenderer({ text }) {
   return <div>{elements}</div>;
 }
 
-/**
- * Process inline formatting: **bold**, *italic*, `code`, within a line.
- */
 function inlineFormat(text) {
-  // Split on **bold**, *italic*, `code` patterns
   const parts = [];
   const regex = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
   let last = 0;
@@ -179,8 +151,8 @@ function inlineFormat(text) {
 const styles = {
   wrapper: {
     display: "flex",
-    gap: "10px",
-    marginBottom: "20px",
+    gap: "12px",
+    marginBottom: "18px",
     animation: "fadeUp 0.3s ease both",
   },
   wrapperUser: {
@@ -190,85 +162,79 @@ const styles = {
     flexDirection: "row",
   },
   avatar: {
-    width: "28px",
-    height: "28px",
-    borderRadius: "8px",
+    width: "30px",
+    height: "30px",
+    borderRadius: "50%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: "11px",
-    fontWeight: "600",
+    fontWeight: "var(--font-weight-semibold)",
     flexShrink: 0,
     marginTop: "2px",
-    fontFamily: "var(--font-mono)",
   },
   avatarUser: {
-    background: "var(--accent-dim)",
-    color: "var(--accent)",
-    border: "1px solid rgba(200,180,250,0.2)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    color: "var(--color-bone)",
+    background: "transparent",
   },
   avatarAssistant: {
-    background: "var(--bg-3)",
-    border: "1px solid var(--border)",
+    background: "var(--color-plum-voltage)",
+    color: "var(--color-bone)",
   },
   bubble: {
-    maxWidth: "80%",
-    borderRadius: "14px",
-    padding: "12px 16px",
-    lineHeight: "1.65",
+    maxWidth: "75%",
+    borderRadius: "var(--radius-cards)",
+    padding: "16px 20px",
+    lineHeight: "1.5",
   },
   bubbleUser: {
-    background: "var(--accent-dim)",
-    border: "1px solid rgba(200,180,250,0.2)",
-    borderTopRightRadius: "4px",
+    background: "transparent",
+    border: "1px solid rgba(255, 255, 255, 0.15)",
+    color: "var(--color-bone)",
   },
   bubbleAssistant: {
-    background: "var(--bg-2)",
-    border: "1px solid var(--border)",
-    borderTopLeftRadius: "4px",
+    background: "transparent",
+    border: "1px solid var(--color-plum-voltage)",
+    color: "var(--color-bone)",
   },
   bubbleError: {
-    background: "rgba(255,107,107,0.08)",
-    border: "1px solid rgba(255,107,107,0.2)",
+    border: "1px solid #ff4a4a",
   },
   userText: {
-    color: "var(--accent)",
     fontSize: "14px",
     margin: 0,
   },
   assistantContent: {
-    color: "var(--text-primary)",
     fontSize: "14px",
   },
   timestamp: {
     fontSize: "10px",
-    color: "var(--text-muted)",
+    color: "var(--color-smoke)",
     marginTop: "6px",
     textAlign: "right",
     fontFamily: "var(--font-mono)",
   },
-  // Markdown styles
   p: {
     margin: "0 0 6px 0",
     fontSize: "14px",
-    color: "var(--text-primary)",
+    color: "var(--color-bone)",
   },
   h2: {
-    fontFamily: "var(--font-display)",
-    fontStyle: "italic",
+    fontFamily: "var(--font-acronym)",
     fontSize: "17px",
-    color: "var(--text-primary)",
-    margin: "10px 0 6px 0",
-    fontWeight: "normal",
+    color: "var(--color-bone)",
+    margin: "12px 0 6px 0",
+    fontWeight: "var(--font-weight-semibold)",
   },
   h3: {
+    fontFamily: "var(--font-acronym)",
     fontSize: "13px",
-    fontWeight: "600",
-    color: "var(--accent)",
+    fontWeight: "var(--font-weight-semibold)",
+    color: "var(--color-plum-voltage)",
     margin: "10px 0 4px 0",
     textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    fontFamily: "var(--font-mono)",
+    letterSpacing: "0.05em",
   },
   ul: {
     margin: "4px 0 8px 0",
@@ -280,31 +246,31 @@ const styles = {
   },
   li: {
     fontSize: "14px",
-    color: "var(--text-primary)",
+    color: "var(--color-bone)",
     marginBottom: "4px",
-    lineHeight: "1.6",
+    lineHeight: "1.5",
   },
   bold: {
-    color: "var(--text-primary)",
-    fontWeight: "600",
+    color: "var(--color-bone)",
+    fontWeight: "var(--font-weight-semibold)",
   },
   italic: {
     fontStyle: "italic",
-    color: "var(--text-secondary)",
+    color: "var(--color-ash)",
   },
   inlineCode: {
     fontFamily: "var(--font-mono)",
     fontSize: "12px",
-    background: "var(--bg-4)",
-    color: "var(--accent)",
+    background: "rgba(255, 255, 255, 0.08)",
+    color: "var(--color-bone)",
     padding: "1px 5px",
     borderRadius: "4px",
-    border: "1px solid var(--border)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
   },
   codeBlock: {
-    background: "var(--bg)",
-    border: "1px solid var(--border)",
-    borderRadius: "8px",
+    background: "#0c0c0e",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: "var(--radius-cards)",
     padding: "12px 14px",
     margin: "8px 0",
     overflowX: "auto",
@@ -314,14 +280,14 @@ const styles = {
     display: "block",
     fontFamily: "var(--font-mono)",
     fontSize: "10px",
-    color: "var(--text-muted)",
+    color: "var(--color-smoke)",
     marginBottom: "6px",
     textTransform: "uppercase",
     letterSpacing: "0.08em",
   },
   hr: {
     border: "none",
-    borderTop: "1px solid var(--border)",
-    margin: "10px 0",
+    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+    margin: "12px 0",
   },
 };

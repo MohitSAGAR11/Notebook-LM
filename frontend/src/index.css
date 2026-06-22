@@ -1,74 +1,147 @@
 :root {
-  --bg: #0c0c0e;
-  --bg-2: #111114;
-  --bg-3: #18181d;
-  --bg-4: #202028;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.16);
-  --text-primary: #f0ede8;
-  --text-secondary: #8b8896;
-  --text-muted: #4e4b58;
-  --accent: #c8b4fa;
-  --accent-dim: rgba(200, 180, 250, 0.12);
-  --accent-glow: rgba(200, 180, 250, 0.06);
-  --green: #6de8b0;
-  --green-dim: rgba(109, 232, 176, 0.1);
-  --amber: #f5c842;
-  --amber-dim: rgba(245, 200, 66, 0.1);
-  --red: #ff6b6b;
-  --font-display: "Instrument Serif", Georgia, serif;
-  --font-body: "DM Sans", sans-serif;
-  --font-mono: "DM Mono", monospace;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3);
+  /* Colors */
+  --color-void: #000000;
+  --color-bone: #ffffff;
+  --color-ash: #bdbdbd;
+  --color-smoke: #9a9a9a;
+  --color-plum-voltage: #8052ff;
+  --color-amber-spark: #ffb829;
+  --color-lichen: #15846e;
+
+  /* Typography — Font Families */
+  --font-acronym: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Typography — Scale */
+  --text-caption: 12px;
+  --leading-caption: 1.5;
+  --tracking-caption: 0.05px;
+  --text-body-sm: 14px;
+  --leading-body-sm: 1.5;
+  --tracking-body-sm: 0.05px;
+  --text-subheading: 18px;
+  --leading-subheading: 1.5;
+  --tracking-subheading: 0.025px;
+  --text-heading-sm: 24px;
+  --leading-heading-sm: 1.3;
+  --tracking-heading-sm: 0.021px;
+  --text-heading: 36px;
+  --leading-heading: 1.2;
+  --tracking-heading: 0.021px;
+  --text-heading-lg: 48px;
+  --leading-heading-lg: 1.1;
+  --tracking-heading-lg: -0.04px;
+  --text-display: 78px;
+  --leading-display: 0.9;
+  --tracking-display: -0.04px;
+  --text-hero: 113px;
+  --leading-hero: 0.81;
+  --tracking-hero: -0.04px;
+
+  /* Typography — Weights */
+  --font-weight-extralight: 200;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --spacing-unit: 6px;
+  --spacing-6: 6px;
+  --spacing-12: 12px;
+  --spacing-18: 18px;
+  --spacing-24: 24px;
+  --spacing-30: 30px;
+  --spacing-36: 36px;
+  --spacing-60: 60px;
+  --spacing-96: 96px;
+  --spacing-120: 120px;
+
+  /* Layout */
+  --page-max-width: 1200px;
+  --section-gap: 60px;
+  --card-padding: 24px;
+  --element-gap: 15px;
+
+  /* Border Radius */
+  --radius-3xl: 24px;
+
+  /* Named Radii */
+  --radius-nav: 24px;
+  --radius-cards: 24px;
+  --radius-buttons: 24px;
+
+  /* Surfaces */
+  --surface-void: #000000;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 html, body, #root {
   height: 100%;
-  background: var(--bg);
-  color: var(--text-primary);
-  font-family: var(--font-body);
+  background: var(--color-void);
+  color: var(--color-bone);
+  font-family: var(--font-acronym);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--bg-4); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
 /* Selection */
-::selection { background: var(--accent-dim); color: var(--accent); }
+::selection {
+  background: rgba(128, 82, 255, 0.2);
+  color: var(--color-bone);
+}
 
 /* Animations */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 180, 250, 0.2); }
-  50% { box-shadow: 0 0 0 8px rgba(200, 180, 250, 0); }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+.fade-up {
+  animation: fadeUp 0.4s ease both;
 }
 
-.fade-up { animation: fadeUp 0.4s ease both; }
-.fade-in { animation: fadeIn 0.3s ease both; }
+.fade-in {
+  animation: fadeIn 0.3s ease both;
+}
