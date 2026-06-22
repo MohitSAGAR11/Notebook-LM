@@ -6,7 +6,7 @@
 
 ---
 
-## Advanced RAG Pipeline
+## Advanced RAG Pipeline   
 
 | Step | Stage | Description |
 |------|-------|-------------|

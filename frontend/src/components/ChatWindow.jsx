@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import MessageBubble from "./MessageBubble.jsx";
 
 const API = import.meta.env.VITE_API_URL || "";
@@ -15,7 +15,6 @@ export default function ChatWindow({ doc, onReset }) {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
-  const abortRef = useRef(null);
 
   // Auto-scroll to latest message
   useEffect(() => {

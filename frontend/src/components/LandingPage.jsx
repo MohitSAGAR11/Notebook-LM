@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 function CanvasConstellation({ density = "comfortable" }) {
   const canvasRef = useRef(null);
@@ -187,12 +187,12 @@ export default function LandingPage({ onLaunch }) {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-plum-voltage)" strokeWidth="1.5" style={{ marginRight: "8px" }}>
             <path d="M12 2L2 12l10 10 10-10L12 2zM12 2v20" />
           </svg>
-          <span style={styles.logoText}>Dala</span>
+          <span style={styles.logoText}>Notebook-LLM</span>
         </div>
         <div style={styles.navCenter}>
-          <a href="#manifesto" style={styles.navLink}>MANIFESTO</a>
+          <a href="#workflow" style={styles.navLink}>WORKFLOW</a>
           <a href="#features" style={styles.navLink}>FEATURES</a>
-          <a href="#tech" style={styles.navLink}>CORE TECH</a>
+          <a href="#tech" style={styles.navLink}>TECH STACK</a>
         </div>
         <div style={styles.navRight}>
           <button style={styles.navCTA} onClick={onLaunch}>
@@ -204,11 +204,10 @@ export default function LandingPage({ onLaunch }) {
       {/* Hero Section */}
       <header style={styles.heroSection}>
         <div style={styles.heroLeft}>
-          <span style={styles.eyebrow}>STOP MANAGING KNOWLEDGE. START USING IT.</span>
-          <h1 style={styles.heroTitle}>Unlock<br />collective<br />wisdom.</h1>
+          <span style={styles.eyebrow}>RETRIEVAL-AUGMENTED GENERATION APPLICATION</span>
+          <h1 style={styles.heroTitle}>Chat with your<br />documents.</h1>
           <p style={styles.heroDesc}>
-            Dala turns your workplace documents into an active conversational partner. 
-            No folders, no tags, no endless searching. Just pure, grounded answers.
+            Notebook-LLM is a full RAG pipeline that lets you upload PDF and TXT documents, extract their content, and query them using query expansion, similarity search, and cross-encoder reranking for grounded, hallucination-free answers.
           </p>
           <button style={styles.primaryButton} onClick={onLaunch}>
             LAUNCH APPLICATION
@@ -219,20 +218,54 @@ export default function LandingPage({ onLaunch }) {
         </div>
       </header>
 
-      {/* Short Product Overview */}
-      <section id="manifesto" style={styles.overviewSection}>
-        <div style={styles.overviewContainer}>
-          <div style={styles.outlineIconWrapper}>
-            <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="var(--color-lichen)" strokeWidth="1">
-              <path d="M12 2L2 12l10 10 10-10L12 2zM12 2v20M2 12h20" />
-            </svg>
+      {/* Ingestion & Querying Workflow */}
+      <section id="workflow" style={styles.overviewSection}>
+        <div style={{ maxWidth: "800px", margin: "0 auto", padding: "0 24px" }}>
+          <div style={{ textAlign: "center", marginBottom: "48px" }}>
+            <span style={styles.eyebrowAccent}>SYSTEM WORKFLOW</span>
+            <h2 style={styles.sectionTitle}>Document Ingestion & Querying Pipeline</h2>
+            <p style={styles.overviewText}>
+              A comprehensive view of how Notebook-LLM processes files page-by-page and conducts multi-query retrieval.
+            </p>
           </div>
-          <h2 style={styles.sectionTitle}>A cosmic field of knowledge.</h2>
-          <p style={styles.overviewText}>
-            Traditional knowledge storage structures documents into static folders that decay over time. 
-            Dala extracts semantic details, connects related vectors, and establishes a real-time retrieval network 
-            that answers questions directly from your files.
-          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            <div style={{ display: "flex", gap: "16px", alignItems: "flex-start", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "16px" }}>
+              <span style={{ fontSize: "18px", color: "var(--color-plum-voltage)", fontWeight: "bold" }}>01</span>
+              <div>
+                <h4 style={{ fontSize: "15px", fontWeight: "600", marginBottom: "4px", color: "var(--color-bone)" }}>Ingestion & PDF Parsing</h4>
+                <p style={{ fontSize: "13px", color: "var(--color-smoke)", lineHeight: "1.4" }}>
+                  Upload a PDF or <code>.txt</code> file. Text is extracted from PDFs page-by-page using <code>pdfjs-dist</code> to optimize server memory usage.
+                </p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "16px", alignItems: "flex-start", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "16px" }}>
+              <span style={{ fontSize: "18px", color: "var(--color-plum-voltage)", fontWeight: "bold" }}>02</span>
+              <div>
+                <h4 style={{ fontSize: "15px", fontWeight: "600", marginBottom: "4px", color: "var(--color-bone)" }}>Recursive Chunking</h4>
+                <p style={{ fontSize: "13px", color: "var(--color-smoke)", lineHeight: "1.4" }}>
+                  A Custom Recursive Character Splitter divides text into 800-character chunks with a 150-character overlap. It splits recursively on paragraphs, newlines, sentences, and spaces to preserve natural context, attaching source metadata to each block.
+                </p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "16px", alignItems: "flex-start", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "16px" }}>
+              <span style={{ fontSize: "18px", color: "var(--color-plum-voltage)", fontWeight: "bold" }}>03</span>
+              <div>
+                <h4 style={{ fontSize: "15px", fontWeight: "600", marginBottom: "4px", color: "var(--color-bone)" }}>Embedding & Namespace Storage</h4>
+                <p style={{ fontSize: "13px", color: "var(--color-smoke)", lineHeight: "1.4" }}>
+                  Chunks are embedded in parallel batches using LangChain's Hugging Face Inference integration with the <code>sentence-transformers/all-MiniLM-L6-v2</code> model. Embeddings are stored in a dedicated document-level namespace in a Pinecone serverless index to guarantee clean isolation.
+                </p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+              <span style={{ fontSize: "18px", color: "var(--color-plum-voltage)", fontWeight: "bold" }}>04</span>
+              <div>
+                <h4 style={{ fontSize: "15px", fontWeight: "600", marginBottom: "4px", color: "var(--color-bone)" }}>Retrieval & Grounded Synthesis</h4>
+                <p style={{ fontSize: "13px", color: "var(--color-smoke)", lineHeight: "1.4" }}>
+                  The query is expanded into 3 variants using <code>gpt-oss-120b</code>. A multi-query search returns the top 5 Pinecone matches per query, which are merged and reranked via a cross-encoder model. The top 5 reranked context blocks are formatted into a grounded prompt for generator execution.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -240,46 +273,75 @@ export default function LandingPage({ onLaunch }) {
       <section id="features" style={styles.featuresSection}>
         <div style={styles.featuresHeader}>
           <span style={styles.eyebrowAccent}>ENGINEERED FOR ACCURACY</span>
-          <h2 style={styles.featuresTitle}>Advanced RAG Architecture</h2>
+          <h2 style={styles.featuresTitle}>Core Retrieval Features</h2>
         </div>
         <div style={styles.grid}>
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>Query Expansion</h3>
             <p style={styles.cardDesc}>
-              LLM automatically synthesizes multiple variations of your query to perform high-recall multi-vector retrieval, extracting relevant pieces hidden across formats.
+              The original question is expanded into 3 variants (1 original + 2 rephrasings) using <code>gpt-oss-120b</code> via OpenRouter to maximize recall and match vectors across multiple phrasing styles.
             </p>
           </div>
           <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Cross-Encoder Reranking</h3>
+            <h3 style={styles.cardTitle}>LLM Cross-Encoder Reranking</h3>
             <p style={styles.cardDesc}>
-              Reranks document candidates in parallel using `gpt-oss-120b` to grade relevance, ensuring the context fed to the generator contains zero noise.
+              Merged candidate chunks from similarity search (Top-K=5) are evaluated in parallel by <code>gpt-oss-120b</code> to grade relevance (0-10). High-scoring chunks are sorted (falling back to cosine similarity on ties) and the top 5 are selected.
             </p>
           </div>
           <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Document Isolation</h3>
+            <h3 style={styles.cardTitle}>Grounded Generation</h3>
             <p style={styles.cardDesc}>
-              Every uploaded document is isolated in a sandboxed vector index namespace, ensuring high speed query speeds and strict tenant isolation.
+              An LLM (<code>gpt-oss-120b:free</code> via OpenRouter) generates the final answer strictly adhering to the top 5 reranked context blocks at a low temperature of <code>0.1</code> to eliminate hallucinations.
             </p>
           </div>
         </div>
       </section>
 
+      {/* Tech Stack Section */}
+      <section id="tech" style={styles.overviewSection}>
+        <div style={{ maxWidth: "800px", margin: "0 auto", padding: "0 24px" }}>
+          <div style={{ textAlign: "center", marginBottom: "36px" }}>
+            <span style={styles.eyebrowAccent}>TECHNOLOGY STACK</span>
+            <h2 style={styles.sectionTitle}>Built on Open-Source & Serverless Standards</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", textAlign: "left" }}>
+            <div style={{ border: "1px solid rgba(255, 255, 255, 0.08)", padding: "24px", borderRadius: "24px" }}>
+              <h4 style={{ color: "var(--color-plum-voltage)", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Backend Infrastructure</h4>
+              <ul style={{ listStyleType: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px", fontSize: "13px", color: "var(--color-smoke)" }}>
+                <li>• <strong>Express</strong> - REST API server</li>
+                <li>• <strong>Multer</strong> - File upload handling</li>
+                <li>• <strong>pdfjs-dist</strong> - Memory-optimized page-by-page PDF parsing</li>
+                <li>• <strong>Pinecone Client</strong> - Namespace database storage</li>
+              </ul>
+            </div>
+            <div style={{ border: "1px solid rgba(255, 255, 255, 0.08)", padding: "24px", borderRadius: "24px" }}>
+              <h4 style={{ color: "var(--color-plum-voltage)", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>AI & Embeddings Integration</h4>
+              <ul style={{ listStyleType: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px", fontSize: "13px", color: "var(--color-smoke)" }}>
+                <li>• <strong>LangChain Community</strong> - Embedding integration</li>
+                <li>• <strong>Hugging Face Inference</strong> - sentence-transformers/all-MiniLM-L6-v2</li>
+                <li>• <strong>OpenRouter client</strong> - gpt-oss-120b access for generation & reranking</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Call to Action */}
-      <section id="tech" style={styles.ctaSection}>
+      <section style={styles.ctaSection}>
         <div style={styles.ctaContainer}>
-          <h2 style={styles.ctaTitle}>Start using collective wisdom.</h2>
+          <h2 style={styles.ctaTitle}>Chat with your documents.</h2>
           <p style={styles.ctaDesc}>
-            Upload a document, type your query, and let the constellation retrieve the answer.
+            Upload a PDF or TXT document and get grounded answers instantly.
           </p>
           <button style={styles.primaryButton} onClick={onLaunch}>
-            LAUNCH APP
+            LAUNCH APPLICATION
           </button>
         </div>
       </section>
 
       {/* Footer */}
       <footer style={styles.footer}>
-        <p style={styles.footerText}>© 2026 Dala Inc. RAG System. All rights reserved.</p>
+        <p style={styles.footerText}>© 2026 Notebook-LLM RAG System. All rights reserved.</p>
       </footer>
     </div>
   );

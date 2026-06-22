@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 
 const API = import.meta.env.VITE_API_URL || "";
 
@@ -64,7 +64,7 @@ export default function UploadZone({ onDocumentReady }) {
           </svg>
         </div>
         <div>
-          <h1 style={styles.title}>Dala Workspace</h1>
+          <h1 style={styles.title}>Notebook-LLM Workspace</h1>
           <p style={styles.subtitle}>Upload your source document to start workspace indexing.</p>
         </div>
       </div>

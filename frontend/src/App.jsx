@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import UploadZone from "./components/UploadZone";
 import MessageBubble from "./components/MessageBubble";
 import LandingPage from "./components/LandingPage";
