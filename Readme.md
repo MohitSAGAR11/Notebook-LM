@@ -4,6 +4,14 @@
 
 🔗 **Live Demo:** [rag-notebook-lm.netlify.app](https://rag-notebook-lm.netlify.app/)
 
+<p align="center">
+  <a href="https://mohitsagar11.github.io/videos/notebooklm.mp4">
+    <img src="docs/demo.jpg" alt="Notebook LM: 20-second demo video, click to play" width="760">
+  </a>
+  <br>
+  <sub>▶ 20-second demo (click the image to play) · file: <a href="docs/demo.mp4"><code>docs/demo.mp4</code></a></sub>
+</p>
+
 ---
 
 ## Advanced RAG Pipeline   
