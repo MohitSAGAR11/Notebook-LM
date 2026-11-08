@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import { ingestDocument, answerQuestion } from "./rag.js";
+import { warmUpEmbedder } from "./embedder.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -132,6 +133,7 @@ app.listen(PORT, () => {
   console.log(
     `   Pinecone index: ${process.env.PINECONE_INDEX_NAME || "notebooklm"}`,
   );
+  warmUpEmbedder();
 });
 
 // Keep-alive ping for Render free tier
