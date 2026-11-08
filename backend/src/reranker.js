@@ -7,12 +7,7 @@
  * then returns the top-K highest scoring chunks.
  */
 
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: "https://openrouter.ai/api/v1",
-});
+import { getLLM, LLM_MODEL } from "./llm.js";
 
 /**
  * Score a single chunk's relevance to the question (0–10).
@@ -22,8 +17,8 @@ const openai = new OpenAI({
  */
 async function scoreChunk(question, chunkText) {
   try {
-    const response = await openai.chat.completions.create({
-      model: "openai/gpt-oss-120b:free",
+    const response = await getLLM().chat.completions.create({
+      model: LLM_MODEL,
       messages: [
         {
           role: "system",
@@ -35,10 +30,14 @@ async function scoreChunk(question, chunkText) {
         },
       ],
       temperature: 0,
-      max_tokens: 4,
+      // gpt-oss is a reasoning model: reasoning tokens count against
+      // max_tokens, so a budget of 4 can leave the reply empty, which made
+      // every chunk score 0 and silently disabled reranking.
+      max_tokens: 256,
     });
 
-    const score = parseInt(response.choices[0].message.content.trim(), 10);
+    const raw = response.choices[0]?.message?.content ?? "";
+    const score = parseInt(raw.match(/\d+/)?.[0] ?? "", 10);
     return isNaN(score) ? 0 : Math.min(10, Math.max(0, score));
   } catch {
     return 0;

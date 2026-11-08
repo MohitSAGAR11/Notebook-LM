@@ -1,0 +1,57 @@
+/* Dark canvas, white headline ink, warm grey body, orange + lime accents.
+   One sticky card on the left, one reading column on the right. */
+
+:root {
+  --bg: #151312;
+  --bg-raise: #1d1b1a;
+  --bg-sheet: #201e1d;
+  --plate: rgba(255, 255, 255, 0.03);
+  --plate-strong: rgba(255, 255, 255, 0.07);
+  --field: #343232;
+  --field-hover: #3b3939;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.14);
+
+  --ink: #ffffff;
+  --ink-soft: #d9d3d0;
+  --muted: #998f8f;
+  --ghost: rgba(182, 180, 189, 0.2);
+  --card: #ffffff;
+  --card-ink: #0d0c0c;
+  --card-muted: #6a6464;
+
+  --orange: #f46c38;
+  --orange-hover: #ff7d4b;
+  --orange-ink: #ffffff;
+  --lime: #c5ff41;
+  --lime-ink: #10120a;
+  --alarm: #ff6b5e;
+  --alarm-plate: rgba(255, 107, 94, 0.1);
+
+  --font: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --display-xl: clamp(3rem, 1.2rem + 6.2vw, 6.875rem);
+  --display-l: clamp(2.75rem, 1.4rem + 4.6vw, 5.625rem);
+  --display-m: clamp(2.25rem, 1.3rem + 3.2vw, 4.375rem);
+  --title: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+  --body-l: 1.125rem;
+  --body: 1rem;
+  --small: 0.875rem;
+  --tiny: 0.75rem;
+
+  --r-s: 6px;
+  --r-m: 8px;
+  --r-tile: 10px;
+  --r-l: 16px;
+
+  --frame: 1140px;
+  --card-w: 344px;
+  --gap: clamp(40px, 7vw, 100px);
+  --section: clamp(80px, 9vw, 120px);
+  --gutter: 20px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --lift: 0 0.6px 1.1px -1.1px rgba(0, 0, 0, 0.26), 0 1.9px 3.5px -2.2px rgba(0, 0, 0, 0.24),
+    0 5.1px 9.2px -3.4px rgba(0, 0, 0, 0.19), 0 16px 28.8px -4.5px rgba(0, 0, 0, 0.03);
+  color-scheme: dark;
+}

@@ -9,17 +9,12 @@
  */
 
 import fs from "fs";
-import OpenAI from "openai";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { chunkDocument } from "./chunker.js";
 import { embedChunks, embedQuery } from "./embedder.js";
 import { upsertVectors, queryVectors } from "./vectorStore.js";
 import { rerank } from "./reranker.js";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: "https://openrouter.ai/api/v1",
-});
+import { getLLM, LLM_MODEL } from "./llm.js";
 
 const EMBED_BATCH_SIZE = 50;
 const READ_STREAM_CHUNK = 64 * 1024; // 64KB
@@ -35,8 +30,8 @@ const READ_STREAM_CHUNK = 64 * 1024; // 64KB
  */
 async function expandQuery(question, n = 2) {
   try {
-    const response = await openai.chat.completions.create({
-      model: "openai/gpt-oss-120b:free",
+    const response = await getLLM().chat.completions.create({
+      model: LLM_MODEL,
       messages: [
         {
           role: "system",
@@ -51,9 +46,12 @@ async function expandQuery(question, n = 2) {
       max_tokens: 256,
     });
 
-    const raw = response.choices[0].message.content.trim();
-    const alternatives = JSON.parse(raw);
-    return [question, ...alternatives.slice(0, n)];
+    // Models often wrap JSON in prose or code fences; pull out the first array.
+    const raw = response.choices[0]?.message?.content ?? "";
+    const match = raw.match(/\[[\s\S]*\]/);
+    const alternatives = match ? JSON.parse(match[0]) : [];
+    const valid = alternatives.filter((a) => typeof a === "string" && a.trim());
+    return [question, ...valid.slice(0, n)];
   } catch {
     // On any failure, fall back gracefully to just the original question
     return [question];
@@ -273,8 +271,8 @@ STRICT RULES:
 RETRIEVED CONTEXT (ranked by relevance, most relevant first):
 ${context}`;
 
-  const response = await openai.chat.completions.create({
-    model: "openai/gpt-oss-120b:free",
+  const response = await getLLM().chat.completions.create({
+    model: LLM_MODEL,
     messages: [
       { role: "system", content: systemPrompt },
       ...conversationHistory,
@@ -284,11 +282,15 @@ ${context}`;
     max_tokens: 1024,
   });
 
-  const answer = response.choices[0].message.content;
+  // Reasoning models can return null content (e.g. token budget spent on reasoning).
+  const answer =
+    response.choices[0]?.message?.content?.trim() ||
+    "The model returned an empty answer. Please try asking again.";
 
   // Return answer + source metadata for the UI to display
   const sources = retrieved.map((r) => ({
     text: r.text.slice(0, 200) + (r.text.length > 200 ? "…" : ""),
+    fullText: r.text, // full chunk so the UI can show the cited passage
     score: r.score,
     chunkIndex: r.metadata.chunkIndex,
     source: r.metadata.source,

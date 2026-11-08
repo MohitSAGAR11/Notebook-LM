@@ -44,12 +44,12 @@
 
 | Package | Role |
 |---------|------|
-| `vite + react` | Fast dev build |
-| `tailwindcss` | Utility-first styling |
-| `UploadZone` | Drag & drop file upload UI |
-| `ChatWindow` | Conversation display |
-| `MessageBubble` | Message rendering |
-| `SourceChips` | Citation/source display |
+| `vite + react 19` | Build tooling and UI |
+| Plain CSS with design tokens | Dark theme, Poppins, orange and lime accents (`src/styles/`) |
+| `marked` + `dompurify` | Markdown answers, sanitized before rendering |
+| `Intake` | Upload with real byte progress, indexing state, cancel and errors |
+| `Transcript` / `Turn` | Questions and answers, revealed progressively |
+| `DocCard` / `SourceViewer` | Sources: every cited passage numbered, opened in full with its position and match score |
 
 ---
 

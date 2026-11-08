@@ -118,7 +118,12 @@ app.post("/api/chat", async (req, res) => {
 // ─── Error handler ────────────────────────────────────────────────────────────
 app.use((err, _req, res, _next) => {
   console.error("[Server Error]", err);
-  res.status(500).json({ error: err.message || "Internal server error." });
+  // Upload validation failures (wrong type, too large) are client errors.
+  const isUploadError =
+    err instanceof multer.MulterError || err.message?.startsWith("Only PDF");
+  res
+    .status(isUploadError ? 400 : 500)
+    .json({ error: err.message || "Internal server error." });
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
