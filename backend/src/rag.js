@@ -14,7 +14,7 @@ import { chunkDocument } from "./chunker.js";
 import { embedChunks, embedQuery } from "./embedder.js";
 import { upsertVectors, queryVectors } from "./vectorStore.js";
 import { rerank } from "./reranker.js";
-import { getLLM, LLM_MODEL } from "./llm.js";
+import { complete } from "./llm.js";
 
 const EMBED_BATCH_SIZE = 50;
 const READ_STREAM_CHUNK = 64 * 1024; // 64KB
@@ -30,8 +30,7 @@ const READ_STREAM_CHUNK = 64 * 1024; // 64KB
  */
 async function expandQuery(question, n = 2) {
   try {
-    const response = await getLLM().chat.completions.create({
-      model: LLM_MODEL,
+    const raw = await complete({
       messages: [
         {
           role: "system",
@@ -43,11 +42,11 @@ async function expandQuery(question, n = 2) {
         },
       ],
       temperature: 0.7,
-      max_tokens: 256,
+      // Room for reasoning models, whose thinking counts against max_tokens.
+      max_tokens: 1024,
     });
 
     // Models often wrap JSON in prose or code fences; pull out the first array.
-    const raw = response.choices[0]?.message?.content ?? "";
     const match = raw.match(/\[[\s\S]*\]/);
     const alternatives = match ? JSON.parse(match[0]) : [];
     const valid = alternatives.filter((a) => typeof a === "string" && a.trim());
@@ -271,21 +270,18 @@ STRICT RULES:
 RETRIEVED CONTEXT (ranked by relevance, most relevant first):
 ${context}`;
 
-  const response = await getLLM().chat.completions.create({
-    model: LLM_MODEL,
+  const reply = await complete({
     messages: [
       { role: "system", content: systemPrompt },
       ...conversationHistory,
       { role: "user", content: question },
     ],
     temperature: 0.1,
-    max_tokens: 1024,
+    max_tokens: 2048,
   });
 
-  // Reasoning models can return null content (e.g. token budget spent on reasoning).
-  const answer =
-    response.choices[0]?.message?.content?.trim() ||
-    "The model returned an empty answer. Please try asking again.";
+  // Reasoning models can return no content (e.g. token budget spent on reasoning).
+  const answer = reply || "The model returned an empty answer. Please try asking again.";
 
   // Return answer + source metadata for the UI to display
   const sources = retrieved.map((r) => ({

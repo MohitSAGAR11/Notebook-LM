@@ -22,8 +22,8 @@
 | 02 | **Chunking** | Custom Recursive Character Splitter — 800-character chunks with 150-character overlap. Splits recursively on separators (paragraphs, newlines, sentences, and spaces) to preserve context. Each chunk includes metadata: `{ source, chunkIndex, totalChunks, charCount }`. |
 | 03 | **Embedding** | `sentence-transformers/all-MiniLM-L6-v2` runs locally in the backend via `@huggingface/transformers` (quantized ONNX), producing 384-dim normalized vectors in batches of 32. No embedding API key or inference credits needed. |
 | 04 | **Storage** | Pinecone serverless index. Chunks are stored in a dedicated document-level namespace to ensure clean isolation between different uploads. |
-| 05 | **Advanced Retrieval** | **1. Query Expansion**: The original question is expanded into 3 variants (1 original + 2 rephrasings) using `gpt-oss-120b` via OpenRouter to maximize recall.<br>**2. Multi-Query Search**: Similarity search (Top-K=5) is performed for all 3 variants in Pinecone, and candidate results are merged and deduplicated.<br>**3. LLM Reranking (Cross-Encoder)**: Merged candidate chunks are evaluated in parallel by `gpt-oss-120b` to score their relevance (0–10). High-scoring chunks are sorted (falling back to cosine similarity on ties) and the top 5 are selected. |
-| 06 | **Grounded Generation** | The top 5 reranked contexts are formatted into a grounded prompt. An LLM (`gpt-oss-120b:free` via OpenRouter) generates the final answer strictly adhering to the context at a low temperature of `0.1` to eliminate hallucinations. Multi-turn chat history is also incorporated. |
+| 05 | **Advanced Retrieval** | **1. Query Expansion**: The original question is expanded into 3 variants (1 original + 2 rephrasings) via OpenRouter to maximize recall.<br>**2. Multi-Query Search**: Similarity search (Top-K=5) is performed for all 3 variants in Pinecone, and candidate results are merged and deduplicated.<br>**3. LLM Reranking (listwise)**: All merged candidates go to the LLM in a single request, which scores each one's relevance (0–10). High-scoring chunks are sorted (falling back to cosine similarity on ties) and the top 5 are selected. |
+| 06 | **Grounded Generation** | The top 5 reranked contexts are formatted into a grounded prompt. An LLM via OpenRouter generates the final answer strictly adhering to the context at a low temperature of `0.1` to eliminate hallucinations. Multi-turn chat history is also incorporated. |
 
 ---
 
@@ -38,7 +38,7 @@
 | `pdfjs-dist` | PDF text extraction (page-by-page) |
 | `@huggingface/transformers` | Local MiniLM embeddings (ONNX) |
 | `@pinecone-database/pinecone` | Vector database for namespace storage |
-| `openai` | Client for OpenRouter (`gpt-oss-120b:free`) for generation, query expansion, and reranking |
+| `openai` | Client for OpenRouter (default `nvidia/nemotron-3-ultra-550b-a55b:free`, falling back to `openrouter/free`) for generation, query expansion, and reranking. 3 LLM requests per question. |
 
 ### Frontend
 
@@ -62,6 +62,8 @@
 PINECONE_API_KEY=your_pinecone_key
 PINECONE_INDEX_NAME=notebooklm
 OPENROUTER_API_KEY=your_openrouter_api_key
+# optional: override the model (free models get retired; openrouter/free is always the fallback)
+# OPENROUTER_MODEL=nvidia/nemotron-3-ultra-550b-a55b:free
 ```
 
 **`frontend/.env`**
